@@ -43,6 +43,8 @@ It allows users to manage portfolios and investments with authentication and acc
    MONGODB_URI=your-mongodb-uri
    NEXTAUTH_SECRET=your-secret-key
    NEXTAUTH_URL=http://localhost:3000
+   GOOGLE_CLIENT_ID=your-oauth-client-id
+   GOOGLE_CLIENT_SECRET=your-oauth-client-secret
    ```
 
 4. Run the development server:

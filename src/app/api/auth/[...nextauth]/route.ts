@@ -1,5 +1,5 @@
 import NextAuth, {Session, SessionStrategy} from "next-auth";
-// import GoogleProvider from "next-auth/providers/google";
+import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials";
 import connectToDatabase from "@/lib/mongodb";
 import User from "@/models/User";
@@ -34,7 +34,11 @@ export const authOptions = {
 
                 return { id: user._id, name: user.name, email: user.email, role: user.role };
             },
-        })
+        }),
+        GoogleProvider({
+            clientId: process.env.GOOGLE_CLIENT_ID || '',
+            clientSecret: process.env.GOOGLE_CLIENT_SECRET || '',
+        }),
     ],
     session: {
         strategy: 'jwt' as SessionStrategy,
