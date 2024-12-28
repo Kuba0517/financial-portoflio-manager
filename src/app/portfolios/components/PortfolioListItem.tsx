@@ -6,15 +6,54 @@ interface PortfolioListItemProps {
 
 export default function PortfolioListItem({id, name, userName}: PortfolioListItemProps) {
     return (
-        <li className="p-4 bg-white rounded shadow">
-        <h2 className="text-lg font-semibold">{userName || ""}</h2>
-            <p>{name}</p>
-            <a
-    href={`/portfolios/${id}`}
-    className="text-primary hover:underline mt-2 inline-block"
+        <li
+            className={`
+        p-4
+        bg-mainGreen-100
+        text-mainGreen-900
+        rounded-lg
+        shadow
+        border border-mainGreen-200
+        transition-shadow
+        duration-300
+        hover:shadow-md
+      `}
         >
-        View Details
-    </a>
-    </li>
-);
+            {userName && (
+                <h2
+                    className={`
+            mb-2 
+            text-lg
+            font-semibold
+            tracking-wide
+            uppercase
+            text-mainGreen-800
+          `}
+                >
+                    {userName}
+                </h2>
+            )}
+            <p className="mb-2 text-base">
+                {name}
+            </p>
+            <a
+                href={`/portfolios/${id}`}
+                className={`
+          inline-block
+          mt-2
+          px-4
+          py-2
+          rounded
+          bg-white
+          text-mainGreen-900
+          font-semibold
+          hover:bg-mainGreen-200
+          transition-colors
+          duration-300
+        `}
+            >
+                View Details
+            </a>
+        </li>
+    );
 }
