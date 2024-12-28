@@ -30,10 +30,12 @@ body {
     padding: 0;
 }
 
-:focus {
-    outline: 2px solid var(--primary-color);
-    outline-offset: 2px;
-}
+/*:focus {*/
+/*    outline: 2px solid var(--primary-color);*/
+/*    outline-offset: 2px;*/
+/*    border-radius: 10px;*/
+/*    padding: 2px;*/
+/*}*/
 
 a {
     color: var(--primary-color);
