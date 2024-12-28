@@ -1,18 +1,24 @@
 import type { Config } from "tailwindcss";
+import formsPlugin from '@tailwindcss/forms';
+import typographyPlugin from '@tailwindcss/typography';
+import aspectRatioPlugin from '@tailwindcss/aspect-ratio';
 
 export default {
-  content: [
-    "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
-    "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
-    "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
-  ],
+  content: ['./src/**/*.{js,ts,jsx,tsx}'],
   theme: {
     extend: {
       colors: {
-        background: "var(--background)",
-        foreground: "var(--foreground)",
+        primary: '#E63946',
+        secondary: '#A8DADC',
+        background: '#f1faee',
+        accent: '#457B9D',
+        dark: '#1D3557',
       },
     },
   },
-  plugins: [],
+  plugins: [
+    formsPlugin,
+    typographyPlugin,
+    aspectRatioPlugin,
+  ],
 } satisfies Config;
