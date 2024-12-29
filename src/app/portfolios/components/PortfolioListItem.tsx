@@ -1,10 +1,21 @@
+"use client";
+
+import { useRouter } from "next/navigation";
+import Button from "@/shared/components/Button";
+
 interface PortfolioListItemProps {
     id: string;
     name: string;
     userName?: string;
 }
 
-export default function PortfolioListItem({id, name, userName}: PortfolioListItemProps) {
+export default function PortfolioListItem({ id, name, userName }: PortfolioListItemProps) {
+    const router = useRouter();
+
+    const handleViewDetails = () => {
+        router.push(`/portfolios/${id}`);
+    };
+
     return (
         <li
             className={`
@@ -36,24 +47,11 @@ export default function PortfolioListItem({id, name, userName}: PortfolioListIte
             <p className="mb-2 text-base">
                 {name}
             </p>
-            <a
-                href={`/portfolios/${id}`}
-                className={`
-          inline-block
-          mt-2
-          px-4
-          py-2
-          rounded
-          bg-white
-          text-mainGreen-900
-          font-semibold
-          hover:bg-mainGreen-200
-          transition-colors
-          duration-300
-        `}
-            >
-                View Details
-            </a>
+
+            <Button
+                label="View Details"
+                onClick={handleViewDetails}
+            />
         </li>
     );
 }
