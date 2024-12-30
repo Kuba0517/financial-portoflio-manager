@@ -1,9 +1,10 @@
 import React from 'react';
+import SearchAssets from "@/app/asset-test/components/SearchAssets";
 
-export function AssetPage() {
+export default function AssetPage() {
     return (
         <div>
-            <h1>Search for Assets here:</h1>
+            <SearchAssets/>
         </div>
     );
 }
