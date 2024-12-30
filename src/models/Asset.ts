@@ -11,10 +11,10 @@ export interface Asset extends Document {
 }
 
 const AssetSchema: Schema = new Schema({
-    name: { type: String, required: true },
+    name: { type: String, required: true, index: true },
     type: { type: String, enum: Object.values(StockType), default: StockType.STOCK} ,
     symbol: { type: String, required: true },
-    description: { type: String, required: true },
+    description: { type: String, required: true, index: true },
     iconUrl: { type: String, required: true },
     webUrl: { type: String, required: true },
 });
