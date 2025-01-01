@@ -11,11 +11,11 @@ const AssetList: React.FC<AssetListProps> = ({ assets }) => {
     }
 
     return (
-        <ul className="mt-4">
+        <ul className="mt-4 bg-mainGreen-600 p-5 rounded-2xl max-h-[50vh] overflow-y-auto">
             {assets.map(asset => (
                 <li
                     key={asset.id}
-                    className="flex items-center p-4 bg-white rounded shadow mb-2 hover:bg-gray-50 transition"
+                    className="flex items-center p-4 bg-mainGreen-300 shadow mb-2 hover:bg-mainGreen-400 transition rounded-xl"
                 >
                     {asset.iconUrl &&
                     <img
@@ -26,7 +26,7 @@ const AssetList: React.FC<AssetListProps> = ({ assets }) => {
                     }
                     <div>
                         <div className="flex items-baseline">
-                            <span className="text-xl font-bold text-blue-600">{asset.symbol}</span>
+                            <span className="text-xl font-bold text-mainGreen-500">{asset.symbol}</span>
                             <span className="ml-2 text-gray-700">{asset.name}</span>
                         </div>
                     </div>

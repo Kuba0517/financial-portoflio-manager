@@ -48,15 +48,16 @@ const SearchAssets: React.FC = () => {
 
     return (
         <div className="w-full max-w-2xl mx-auto mt-8">
-            <div className="flex items-center border border-gray-300 rounded-md p-2">
-                <FaMagnifyingGlass/>
+            <div className="flex items-center border border-mainGreen-500 rounded-2xl bg-mainGreen-200 p-2 space-x-2">
+                <FaMagnifyingGlass className={"text-mainGreen-700"}/>
                 <input
                     type="text"
                     value={query}
                     onChange={handleChange}
                     placeholder="Search assets..."
-                    className="w-full outline-none text-gray-700"
+                    className="w-full outline-none text-gray-700 rounded-xl focus:outline-mainGreen-500"
                 />
+
             </div>
             {isLoading && <p className="text-center text-gray-500 mt-4">Loading...</p>}
             {error && <p className="text-center text-red-500 mt-4">{error}</p>}
