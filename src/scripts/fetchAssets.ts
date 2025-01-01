@@ -2,9 +2,9 @@ import dotenv from 'dotenv';
 import axios from 'axios';
 import PQueue from 'p-queue';
 import connectToDatabase from '../lib/mongodb';
-import Asset, {Asset as AssetModel} from '../models/Asset';
+import Asset, { Asset as AssetModel } from '../models/Asset';
 import mongoose from "mongoose";
-import {StockType} from "@/types/AssetType";
+import { StockType } from "@/types/AssetType";
 
 dotenv.config({ path: '.env.local' });
 
@@ -45,7 +45,6 @@ async function fetchAssetDetails(symbol: string): Promise<Partial<AssetModel> | 
         });
 
         const profile = profileResponse.data;
-        console.log(profile);
 
         if (!profile) {
             console.warn(`Brak profilu dla symbolu: ${symbol}`);
@@ -86,25 +85,31 @@ async function main() {
 
     const queue = new PQueue({
         interval: 1000,
-        intervalCap: 5,
+        intervalCap: 20,
     });
 
     let processed = 0;
     let successful = 0;
+    let skipped = 0;
     let failed = 0;
 
     for (const symbol of symbols) {
         await queue.add(async () => {
+            // Check if the symbol already exists in the database
+            const existingAsset = await Asset.findOne({ symbol });
+            if (existingAsset) {
+                console.log(`Symbol ${symbol} już istnieje w bazie danych. Pomijanie.`);
+                skipped++;
+                processed++;
+                return;
+            }
+
             const assetDetails = await fetchAssetDetails(symbol);
 
             if (assetDetails) {
                 try {
-                    await Asset.findOneAndUpdate(
-                        { symbol: assetDetails.symbol },
-                        assetDetails,
-                        { upsert: true, new: true, setDefaultsOnInsert: true }
-                    );
-                    console.log(`Zapisano/aktualizowano: ${assetDetails.symbol}`);
+                    await Asset.create(assetDetails);
+                    console.log(`Dodano nowy symbol: ${assetDetails.symbol}`);
                     successful++;
                 } catch (error: any) {
                     console.error(`Błąd podczas zapisywania symbolu ${symbol}:`, error.message);
@@ -126,7 +131,8 @@ async function main() {
 
     console.log('Skrypt zakończony.');
     console.log(`Przetworzono: ${processed}`);
-    console.log(`Sukces: ${successful}`);
+    console.log(`Dodano nowe: ${successful}`);
+    console.log(`Pominięto istniejące: ${skipped}`);
     console.log(`Niepowodzenia: ${failed}`);
 
     await mongoose.disconnect();

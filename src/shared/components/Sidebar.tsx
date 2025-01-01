@@ -49,7 +49,6 @@ export default function Sidebar() {
         <>
             <div className="md:hidden bg-mainGreen-500 text-white flex items-center p-4">
                 <button onClick={handleMobileToggle} aria-label="Open menu" className="mr-2">
-                    {/* Hamburger Icon (3 lines) */}
                     <svg className="h-6 w-6 fill-current" viewBox="0 0 24 24">
                         <path d="M4 5h16M4 12h16M4 19h16" />
                     </svg>
