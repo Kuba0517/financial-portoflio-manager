@@ -2,48 +2,50 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import {cn} from "@/utils/cn";
-
-function HomeIcon() {
-    return (
-        <svg className="h-6 w-6" viewBox="0 0 24 24">
-            <path
-                d="M3 9.75L12 3l9 6.75v9A2.25 2.25 0 0118.75 21H5.25A2.25 2.25 0 013 18.75v-9z"
-                fill="currentColor"
-            />
-        </svg>
-    );
-}
-
-function InfoIcon() {
-    return (
-        <svg className="h-6 w-6" viewBox="0 0 24 24">
-            <path
-                d="M12 2.25a9.75 9.75 0 110 19.5 9.75 9.75 0 010-19.5zm.75 13.5v-6h-1.5v6h1.5zm0 3v-1.5h-1.5V18h1.5z"
-                fill="currentColor"
-            />
-        </svg>
-    );
-}
-
-function ContactIcon() {
-    return (
-        <svg className="h-6 w-6" viewBox="0 0 24 24">
-            <path
-                d="M2.25 4.5A2.25 2.25 0 014.5 2.25h15a2.25 2.25 0 012.25 2.25v15a2.25 2.25 0 01-2.25 2.25h-15A2.25 2.25 0 012.25 19.5v-15zM12 13.875a3.375 3.375 0 100-6.75 3.375 3.375 0 000 6.75zm5.25 3.375v-.75a3.375 3.375 0 00-3.375-3.375h-3.75A3.375 3.375 0 006.75 16.5v.75h10.5z"
-                fill="currentColor"
-            />
-        </svg>
-    );
-}
+import { cn } from "@/utils/cn";
+import Button from "@/shared/components/Button";
+import { IoMdHome } from "react-icons/io";
+import { FaMoneyBillWave } from "react-icons/fa";
+import { CgProfile } from "react-icons/cg";
+import { useSession, signOut } from "next-auth/react";
 
 export default function Sidebar() {
     const [isMobileOpen, setIsMobileOpen] = useState(false);
-
     const [isDesktopOpen, setIsDesktopOpen] = useState(false);
+
+    const { data: session, status } = useSession();
 
     const handleMobileToggle = () => setIsMobileOpen(!isMobileOpen);
     const handleDesktopToggle = () => setIsDesktopOpen(!isDesktopOpen);
+
+    const handleSignOut = () => {
+        signOut({ callbackUrl: "/" });
+    };
+
+    const navLinks = [
+        {
+            href: "/",
+            label: "Home",
+            icon: <IoMdHome className="text-mainGreen-200 text-2xl" />,
+            requiresAuth: false,
+        },
+        {
+            href: "/portfolios",
+            label: "All Portfolios",
+            icon: <FaMoneyBillWave className="text-mainGreen-200 text-2xl" />,
+            requiresAuth: false,
+        },
+        {
+            href: "/profile",
+            label: "My Profile",
+            icon: <CgProfile className="text-mainGreen-200 text-2xl"/>,
+            requiresAuth: true,
+        }
+    ];
+
+    if (status === "loading") {
+        return null;
+    }
 
     return (
         <>
@@ -55,6 +57,7 @@ export default function Sidebar() {
                 </button>
                 <h1 className="text-xl font-bold">My Brand</h1>
             </div>
+
             <div
                 className={`
           hidden md:flex md:flex-col 
@@ -69,9 +72,7 @@ export default function Sidebar() {
                     className="mb-4 flex items-center justify-center"
                 >
                     <svg
-                        className={`h-6 w-6 transition-transform ${
-                            isDesktopOpen ? "rotate-180" : ""
-                        }`}
+                        className={`h-6 w-6 transition-transform ${isDesktopOpen ? "rotate-180" : ""}`}
                         viewBox="0 0 24 24"
                     >
                         <path
@@ -88,27 +89,32 @@ export default function Sidebar() {
                 {isDesktopOpen && <h2 className="text-2xl font-bold mb-6">My Brand</h2>}
                 <nav className="flex-1">
                     <ul className="space-y-4">
-                        <li>
-                            <Link href="/" className={cn("flex gap-2", !isDesktopOpen && "justify-center")}>
-                                <HomeIcon/>
-                                {isDesktopOpen && <span>Home</span>}
+                        {navLinks
+                            .filter(({ requiresAuth }) => !requiresAuth || status === "authenticated")
+                            .map(({ href, label, icon }) => (
+                                <li key={href}>
+                                    <Link href={href} className={cn("flex gap-2", !isDesktopOpen && "justify-center")}>
+                                        {icon}
+                                        {isDesktopOpen && <span>{label}</span>}
+                                    </Link>
+                                </li>
+                            ))}
+                        {isDesktopOpen && status === "unauthenticated" && (
+                            <Link href="/auth/signin">
+                                <Button label="Login" />
                             </Link>
-                        </li>
-                        <li>
-                            <Link href="/about" className={cn("flex gap-2", !isDesktopOpen && "justify-center")}>
-                                <InfoIcon/>
-                                {isDesktopOpen && <span>About</span>}
-                            </Link>
-                        </li>
-                        <li>
-                            <Link href="/contact" className={cn("flex gap-2", !isDesktopOpen && "justify-center")}>
-                                <ContactIcon/>
-                                {isDesktopOpen && <span>Contact</span>}
-                            </Link>
-                        </li>
+                        )}
+                        {isDesktopOpen && status === "authenticated" && (
+                            <>
+                                <h1>Hello {session?.user?.name}</h1>
+                                <Button label="Sign Out" onClick={handleSignOut} />
+                            </>
+                        )}
                     </ul>
                 </nav>
             </div>
+
+            {/* Menu mobilne */}
             {isMobileOpen && (
                 <div
                     className="md:hidden fixed inset-0 z-50 bg-black bg-opacity-50"
@@ -126,18 +132,15 @@ export default function Sidebar() {
                             </svg>
                             <span className="ml-2">Close</span>
                         </button>
-
                         <nav>
                             <ul className="space-y-4">
-                                <li>
-                                    <Link href="/">Home</Link>
-                                </li>
-                                <li>
-                                    <Link href="/about">About</Link>
-                                </li>
-                                <li>
-                                    <Link href="/contact">Contact</Link>
-                                </li>
+                                {navLinks
+                                    .filter(({ requiresAuth }) => !requiresAuth || status === "authenticated")
+                                    .map(({ href, label }) => (
+                                        <li key={href}>
+                                            <Link href={href}>{label}</Link>
+                                        </li>
+                                    ))}
                             </ul>
                         </nav>
                     </div>

@@ -95,7 +95,6 @@ async function main() {
 
     for (const symbol of symbols) {
         await queue.add(async () => {
-            // Check if the symbol already exists in the database
             const existingAsset = await Asset.findOne({ symbol });
             if (existingAsset) {
                 console.log(`Symbol ${symbol} już istnieje w bazie danych. Pomijanie.`);

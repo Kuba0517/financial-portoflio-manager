@@ -2,18 +2,36 @@
 
 import { useRouter } from "next/navigation";
 import Button from "@/shared/components/Button";
+import apiClient from "@/lib/apiClient";
 
 interface PortfolioListItemProps {
     id: string;
     name: string;
     userName?: string;
+    isAdmin?: boolean;
 }
 
-export default function PortfolioListItem({ id, name, userName }: PortfolioListItemProps) {
+export default function PortfolioListItem({ id, name, userName, isAdmin }: PortfolioListItemProps) {
     const router = useRouter();
 
     const handleViewDetails = () => {
         router.push(`/portfolios/${id}`);
+    };
+
+    const handleDelete = async () => {
+        if (!confirm(`Are you sure you want to delete the portfolio "${name}"?`)) {
+            return;
+        }
+
+        try {
+            await apiClient(`/api/portfolios/${id}`);
+
+            alert("Portfolio deleted successfully.");
+            router.refresh();
+        } catch (error) {
+            console.error(error);
+            alert("Error deleting portfolio.");
+        }
     };
 
     return (
@@ -44,14 +62,20 @@ export default function PortfolioListItem({ id, name, userName }: PortfolioListI
                     {userName}
                 </h2>
             )}
-            <p className="mb-2 text-base">
-                {name}
-            </p>
+            <p className="mb-2 text-base truncate">{name}</p>
 
-            <Button
-                label="View Details"
-                onClick={handleViewDetails}
-            />
+            <div className="flex gap-2">
+                <Button label="View Details" onClick={handleViewDetails} />
+                {isAdmin && (
+                    <>
+                        <Button
+                            label="Delete"
+                            onClick={handleDelete}
+                            className="bg-red-500 text-white hover:bg-red-600"
+                        />
+                    </>
+                )}
+            </div>
         </li>
     );
 }

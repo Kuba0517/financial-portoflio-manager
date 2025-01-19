@@ -1,4 +1,4 @@
-import bcrypt from "bcrypt";
+import bcrypt from 'bcryptjs';
 import User from "@/models/User";
 import connectToDatabase from "@/lib/mongodb";
 import {UserRole} from "@/types/UserRoles";
