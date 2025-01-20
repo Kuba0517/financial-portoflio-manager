@@ -1,12 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import {useEffect, useState} from "react";
+import { useEffect, useState } from "react";
 import apiClient from "@/lib/apiClient";
-import {UserResponseDTO} from "@/dtos/user.dto";
+import { UserResponseDTO } from "@/dtos/user.dto";
 import Loader from "@/shared/components/Loader";
 import Button from "@/shared/components/Button";
 import NewPortfolioModal from "@/shared/components/PortfolioModal";
+import { Session } from "next-auth";
 
 interface Portfolio {
     id: string;
@@ -15,50 +16,55 @@ interface Portfolio {
 
 interface UserPortfolioProps {
     user: UserResponseDTO;
+    session: Session | null;
 }
 
-export default function UserPortfolio({user}: UserPortfolioProps) {
+export default function UserPortfolio({ user, session }: UserPortfolioProps) {
     const [portfolios, setPortfolios] = useState<Portfolio[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
 
-    useEffect(() => {
-        const fetchPortfolios = async () => {
-            try {
-                const response = await apiClient.get(`/api/portfolios?user=${user.id}`);
-                setPortfolios(response.data.portfolios);
-            } catch (err) {
-                console.error("Error fetching portfolios:", err);
-                setError("Failed to load portfolios. Please try again later.");
-            } finally {
-                setLoading(false);
-            }
-        };
+    const fetchPortfolios = async () => {
+        setLoading(true);
+        try {
+            const response = await apiClient.get(`/api/portfolios?userId=${user.id}`);
+            setPortfolios(response.data.portfolios);
+        } catch (err) {
+            console.error("Error fetching portfolios:", err);
+            setError("Failed to load portfolios. Please try again later.");
+        } finally {
+            setLoading(false);
+        }
+    };
 
+    useEffect(() => {
         fetchPortfolios();
     }, [user.id]);
 
-    const handleAddPortfolio = async (portfolioName: string, investments: any[]) => {
+    const handleDelete = async (id: string) => {
+        if (!confirm("Are you sure you want to delete this portfolio?")) return;
+
         try {
-            const response = await apiClient.post("/api/portfolios", {
-                name: portfolioName,
-                userId: user.id,
-                investments,
-            });
-            setPortfolios((prev) => [...prev, response.data]);
+            await apiClient.delete(`/api/portfolios/${id}`);
+            setPortfolios((prev) => prev.filter((portfolio) => portfolio.id !== id));
+            alert("Portfolio deleted successfully.");
         } catch (error) {
-            console.error("Error adding portfolio:", error);
-            setError("Failed to add portfolio. Please try again later.");
+            console.error("Error deleting portfolio:", error);
+            alert("Failed to delete portfolio. Please try again.");
         }
     };
 
     if (loading) {
-        return <Loader/>;
+        return <Loader />;
     }
 
     if (error) {
         return <p className="text-red-500">{error}</p>;
+    }
+
+    if (!session) {
+        return <p>The user may not be logged in</p>;
     }
 
     return (
@@ -67,7 +73,7 @@ export default function UserPortfolio({user}: UserPortfolioProps) {
             <p className="text-sm text-mainGreen-700 mb-4">
                 Total portfolios: <span className="font-semibold">{portfolios.length}</span>
             </p>
-            <div className={"flex flex-col gap-8"}>
+            <div className="flex flex-col gap-8">
                 <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                     {portfolios.map((portfolio) => (
                         <li
@@ -80,11 +86,14 @@ export default function UserPortfolio({user}: UserPortfolioProps) {
                             <p className="text-sm text-mainGreen-600 truncate w-full text-center">
                                 View details
                             </p>
-                            <div className={"flex gap-5"}>
+                            <div className="flex gap-5">
                                 <Link href={`/portfolios/${portfolio.id}`}>
-                                    <Button label={"Open"}/>
+                                    <Button label={"Open"} />
                                 </Link>
-                                <Button label={"Delete"}/>
+                                <Button
+                                    label={"Delete"}
+                                    onClick={() => handleDelete(portfolio.id)}
+                                />
                             </div>
                         </li>
                     ))}
@@ -96,8 +105,11 @@ export default function UserPortfolio({user}: UserPortfolioProps) {
             </div>
             {isModalOpen && (
                 <NewPortfolioModal
-                    onClose={() => setIsModalOpen(false)}
-                    onSubmit={handleAddPortfolio}
+                    onClose={() => {
+                        setIsModalOpen(false);
+                        fetchPortfolios();
+                    }}
+                    session={session}
                 />
             )}
         </div>

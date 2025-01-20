@@ -24,10 +24,12 @@ async function mapToPortfolioDTO(portfolioId: string): Promise<PortfolioDTO | nu
     return {
         id: portfolio._id.toString(),
         name: portfolio.name,
+        userId: portfolio.user,
         createdAt: portfolio.createdAt.toISOString(),
         investments: investments.map((inv) => {
             const asset = assets.find((a) => a._id.toString() === inv.assetId.toString());
             return {
+                id: inv._id,
                 quantity: inv.quantity,
                 purchasePrice: inv.purchasePrice,
                 asset: {
@@ -61,15 +63,36 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
     const id = (await params).id;
     const data = await req.json();
 
-    const updatedPortfolio = await Portfolio.findByIdAndUpdate(id, data, { new: true });
+    const updatedPortfolio = await Portfolio.findByIdAndUpdate(
+        id,
+        {
+            name: data.name
+        },
+        { new: true }
+    );
 
     if (!updatedPortfolio) {
         return new Response(JSON.stringify({ error: "Portfolio not found" }), { status: 404 });
     }
 
+    await Investment.deleteMany({ portfolioId: id });
+
+    for (const inv of data.investments) {
+        await Investment.create({
+            portfolioId: id,
+            assetId: inv.assetId,
+            quantity: inv.quantity,
+            purchasePrice: inv.purchasePrice,
+        });
+    }
+
     const portfolioDTO = await mapToPortfolioDTO(updatedPortfolio.id.toString());
-    return new Response(JSON.stringify(portfolioDTO), { status: 200, headers: { "Content-Type": "application/json" } });
+    return new Response(JSON.stringify(portfolioDTO), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+    });
 }
+
 
 export async function DELETE(req: Request, { params }: { params: Promise<{ id: string }> }) {
     await connectToDatabase();

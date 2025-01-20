@@ -1,26 +1,23 @@
-import connectToDatabase from '@/lib/mongodb';
-import User from '@/models/User';
-import { UserResponseDTO } from '@/dtos/user.dto';
+import { NextRequest, NextResponse } from "next/server";
+import connectToDatabase from "@/lib/mongodb";
+import User from "@/models/User";
+import { UserResponseDTO } from "@/dtos/user.dto";
 
-export async function GET(req: Request) {
+export async function GET(req: NextRequest) {
     await connectToDatabase();
 
-    const url = new URL(req.url);
-    const email = url.searchParams.get("email");
+    const { searchParams } = new URL(req.url);
+    const email = searchParams.get("email");
 
     try {
         if (email) {
             const user = await User.findOne({ email }).select("-password");
-
             if (!user) {
-                return new Response(JSON.stringify({ error: "User not found" }), {
-                    status: 404,
-                    headers: { "Content-Type": "application/json" },
-                });
+                return NextResponse.json({ error: "User not found" }, { status: 404 });
             }
 
             const userDTO: UserResponseDTO = {
-                id: user._id,
+                id: user._id.toString(),
                 name: user.name,
                 email: user.email,
                 role: user.role,
@@ -28,41 +25,36 @@ export async function GET(req: Request) {
                 createdAt: user.createdAt.toISOString(),
             };
 
-            return new Response(JSON.stringify(userDTO), {
-                status: 200,
-                headers: { "Content-Type": "application/json" },
-            });
+            return NextResponse.json(userDTO, { status: 200 });
         } else {
             const users = await User.find().select("-password");
-
-            const usersDTO: UserResponseDTO[] = users.map((user) => ({
-                id: user._id,
-                name: user.name,
-                email: user.email,
-                role: user.role,
-                description: user.description,
-                createdAt: user.createdAt.toISOString(),
+            const usersDTO: UserResponseDTO[] = users.map((u) => ({
+                id: u._id.toString(),
+                name: u.name,
+                email: u.email,
+                role: u.role,
+                description: u.description,
+                createdAt: u.createdAt.toISOString(),
             }));
 
-            return new Response(JSON.stringify(usersDTO), {
-                status: 200,
-                headers: { "Content-Type": "application/json" },
-            });
+            return NextResponse.json(usersDTO, { status: 200 });
         }
     } catch (error) {
         console.error("Error fetching users:", error);
-
-        return new Response(JSON.stringify({ error: "Internal server error" }), {
-            status: 500,
-            headers: { "Content-Type": "application/json" },
-        });
+        return NextResponse.json({ error: "Internal server error" }, { status: 500 });
     }
 }
 
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
     await connectToDatabase();
-    const data = await req.json();
-    const user = await User.create(data);
-    return Response.json(user, { status: 201 });
+    const body = await req.json();
+
+    try {
+        const newUser = await User.create(body);
+        return NextResponse.json(newUser, { status: 201 });
+    } catch (error) {
+        console.error("Error creating user:", error);
+        return NextResponse.json({ error: "Failed to create user" }, { status: 400 });
+    }
 }

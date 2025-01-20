@@ -9,30 +9,16 @@ interface PortfolioListItemProps {
     name: string;
     userName?: string;
     isAdmin?: boolean;
+    onDelete?: () => Promise<void>;
 }
 
-export default function PortfolioListItem({ id, name, userName, isAdmin }: PortfolioListItemProps) {
+export default function PortfolioListItem({ id, name, userName, isAdmin, onDelete }: PortfolioListItemProps) {
     const router = useRouter();
 
     const handleViewDetails = () => {
         router.push(`/portfolios/${id}`);
     };
 
-    const handleDelete = async () => {
-        if (!confirm(`Are you sure you want to delete the portfolio "${name}"?`)) {
-            return;
-        }
-
-        try {
-            await apiClient(`/api/portfolios/${id}`);
-
-            alert("Portfolio deleted successfully.");
-            router.refresh();
-        } catch (error) {
-            console.error(error);
-            alert("Error deleting portfolio.");
-        }
-    };
 
     return (
         <li
@@ -70,7 +56,7 @@ export default function PortfolioListItem({ id, name, userName, isAdmin }: Portf
                     <>
                         <Button
                             label="Delete"
-                            onClick={handleDelete}
+                            onClick={onDelete}
                             className="bg-red-500 text-white hover:bg-red-600"
                         />
                     </>

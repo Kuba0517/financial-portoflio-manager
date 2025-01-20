@@ -1,6 +1,6 @@
-import { NextResponse } from "next/server";
-import { NextRequest } from "next/server";
-import { getToken } from "next-auth/jwt";
+import {NextRequest, NextResponse} from "next/server";
+import {getToken} from "next-auth/jwt";
+import {UserRole} from "@/types/UserRoles";
 
 const protectedPaths = ['/admin', '/profile'];
 
@@ -21,7 +21,7 @@ export async function middleware(req: NextRequest) {
         return NextResponse.redirect(loginUrl);
     }
 
-    if (pathname.startsWith('/admin') && token.role !== 'admin') {
+    if (pathname.startsWith('/admin') && token.role !== UserRole.ADMIN) {
         return NextResponse.redirect(new URL('/unauthorized', req.url));
     }
 

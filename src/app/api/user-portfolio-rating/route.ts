@@ -1,43 +1,82 @@
-import connectToDatabase from '@/lib/mongodb';
-import UserPortfolioRating from '@/models/UserPortfolioRating';
+import { NextRequest, NextResponse } from "next/server";
+import connectToDatabase from "@/lib/mongodb";
+import UserPortfolioRating from "@/models/UserPortfolioRating";
 import Portfolio from "@/models/Portfolio";
 
-export async function GET() {
-    await connectToDatabase();
+export async function POST(req: NextRequest) {
+    try {
+        await connectToDatabase();
+        const body = await req.json();
+        const { portfolioId, rating, comment, userId } = body;
 
-    const ratings = await UserPortfolioRating.find();
+        console.log(portfolioId + " " + rating + " " + comment + " " + userId);
 
-    return new Response(JSON.stringify(ratings), {
-        status: 200,
-        headers: {"Content-Type": "application/json"},
-    });
+        if (!portfolioId) {
+            return NextResponse.json({ error: "portfolioId is required" }, { status: 400 });
+        }
+        if (typeof rating !== "number" || rating < 1 || rating > 5) {
+            return NextResponse.json({ error: "Rating must be between 1 and 5" }, { status: 400 });
+        }
+        if (!comment?.trim()) {
+            return NextResponse.json({ error: "Comment cannot be empty" }, { status: 400 });
+        }
+
+        const portfolioExists = await Portfolio.exists({ _id: portfolioId });
+        if (!portfolioExists) {
+            return NextResponse.json({ error: "Portfolio not found" }, { status: 404 });
+        }
+
+        const newRating = await UserPortfolioRating.create({
+            portfolioId,
+            userId,
+            rating,
+            comment
+        });
+
+        const populatedRating = await newRating.populate({
+            path: "userId",
+            select: "name"
+        })
+
+        return NextResponse.json(
+            {
+                review: {
+                    id: populatedRating._id,
+                    portfolioId: populatedRating.portfolioId,
+                    userId: populatedRating.userId._id,
+                    userName: populatedRating.userId.name,
+                    rating: populatedRating.rating,
+                    comment: populatedRating.comment,
+                    createdAt: populatedRating.createdAt,
+                },
+            },
+            { status: 201 }
+        );
+    } catch (error) {
+        console.error("Error creating review:", error);
+        return NextResponse.json({ error: "Failed to create review" }, { status: 500 });
+    }
 }
 
-export async function POST(req: Request) {
-    await connectToDatabase();
-
+export async function GET(req: NextRequest) {
     try {
-        const data = await req.json();
+        await connectToDatabase();
+        const { searchParams } = new URL(req.url);
+        const portfolioId = searchParams.get("portfolioId");
 
-        const portfolioExists = await Portfolio.exists({_id: data.portfolioId});
-        if (!portfolioExists) {
-            return new Response(
-                JSON.stringify({error: "Portfolio not found"}),
-                {status: 404, headers: {"Content-Type": "application/json"}}
-            );
+        const filter: any = {};
+        if (portfolioId) {
+            filter.portfolioId = portfolioId;
         }
 
-        const rating = await UserPortfolioRating.create(data);
+        const ratings = await UserPortfolioRating.find(filter);
 
-        return new Response(JSON.stringify(rating), {status: 201, headers: {"Content-Type": "application/json"}});
+        return NextResponse.json({ reviews: ratings }, { status: 200 });
     } catch (error) {
-        if (error instanceof Error) {
-            console.error("Error creating user portfolio rating:", error);
-
-            return new Response(
-                JSON.stringify({error: "Failed to create rating", details: error.message}),
-                {status: 400, headers: {"Content-Type": "application/json"}}
-            );
-        }
+        console.error("Error fetching reviews:", error);
+        return NextResponse.json(
+            { error: "Failed to fetch reviews" },
+            { status: 500 }
+        );
     }
 }

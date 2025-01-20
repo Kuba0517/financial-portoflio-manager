@@ -12,6 +12,7 @@ interface Investment {
 interface Asset {
     id: string;
     name: string;
+    iconUrl: string;
     investments: Investment[];
 }
 
@@ -20,15 +21,16 @@ interface PortfolioInvestmentsProps {
 }
 
 function PortfolioInvestments({ assets }: PortfolioInvestmentsProps) {
+    console.log(assets)
     return (
         <div>
             {assets.map((asset) => (
                 <ExpandableList key={asset.id} title={asset.name}>
-                    <ul key={asset.id} className="space-y-4">
+                    <ul className="space-y-4">
                         {asset.investments.map((investment) => (
-                            <li key={investment.id}>
+                            <li key={`${investment.id}-${asset.id}`}>
                                 <InvestmentCard
-                                    assetIconUrl={investment.assetIconUrl}
+                                    assetIconUrl={asset.iconUrl}
                                     assetName={asset.name}
                                     assetTicker={investment.assetTicker}
                                     quantity={investment.quantity}

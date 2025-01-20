@@ -1,5 +1,6 @@
 import connectToDatabase from "@/lib/mongodb";
 import Portfolio from "@/models/Portfolio";
+import Investment from "@/models/Investment";
 
 export async function GET(req: Request) {
     await connectToDatabase();
@@ -13,11 +14,13 @@ export async function GET(req: Request) {
     try {
         const filter = userId ? { user: userId } : {};
 
-        const portfolios = await Portfolio.find(filter)
-            .skip(skip)
-            .limit(limit)
-            .populate("user", "name email");
+        let query = Portfolio.find(filter).populate("user", "name email");
 
+        if (!userId) {
+            query = query.skip(skip).limit(limit);
+        }
+
+        const portfolios = await query;
         const total = await Portfolio.countDocuments(filter);
 
         const formattedPortfolios = portfolios.map((portfolio) => ({
@@ -37,8 +40,8 @@ export async function GET(req: Request) {
             JSON.stringify({
                 portfolios: formattedPortfolios,
                 total,
-                page,
-                limit,
+                page: userId ? 1 : page,
+                limit: userId ? portfolios.length : limit,
             }),
             { status: 200, headers: { "Content-Type": "application/json" } }
         );
@@ -47,8 +50,8 @@ export async function GET(req: Request) {
             console.error("Error fetching portfolios:", error);
 
             return new Response(
-                JSON.stringify({error: "Failed to fetch portfolios", details: error.message}),
-                {status: 500, headers: {"Content-Type": "application/json"}}
+                JSON.stringify({ error: "Failed to fetch portfolios", details: error.message }),
+                { status: 500, headers: { "Content-Type": "application/json" } }
             );
         }
     }
@@ -60,43 +63,39 @@ export async function POST(req: Request) {
     try {
         const { name, investments, userId } = await req.json();
 
-        if (!name || !investments || !Array.isArray(investments) || !userId) {
+        if (!name || !Array.isArray(investments) || investments.length === 0 || !userId) {
             return new Response(
                 JSON.stringify({ error: "Invalid request data" }),
                 { status: 400, headers: { "Content-Type": "application/json" } }
             );
         }
 
-        // Create a new portfolio document
-        const newPortfolio = new Portfolio({
-            name,
-            investments,
-            user: userId,
-            createdAt: new Date(),
-        });
+        const portfolio = await Portfolio.create({ name, user: userId });
 
-        const savedPortfolio = await newPortfolio.save();
+        const investmentPromises = investments.map((investment: any) =>
+            Investment.create({
+                portfolioId: portfolio._id,
+                assetId: investment.assetId,
+                quantity: investment.quantity,
+                purchasePrice: investment.purchasePrice,
+            })
+        );
+
+        await Promise.all(investmentPromises);
 
         return new Response(
             JSON.stringify({
-                message: "Portfolio created successfully",
-                portfolio: {
-                    id: savedPortfolio._id.toString(),
-                    name: savedPortfolio.name,
-                    createdAt: savedPortfolio.createdAt,
-                    user: savedPortfolio.user,
-                },
+                message: "Portfolio and investments created successfully",
+                portfolioId: portfolio._id.toString(),
             }),
             { status: 201, headers: { "Content-Type": "application/json" } }
         );
     } catch (error) {
-        if (error instanceof Error) {
-            console.error("Error creating portfolio:", error);
+        console.error("Error creating portfolio and investments:", error);
 
-            return new Response(
-                JSON.stringify({error: "Failed to create portfolio", details: error.message}),
-                {status: 500, headers: {"Content-Type": "application/json"}}
-            );
-        }
+        return new Response(
+            JSON.stringify({ error: "Failed to create portfolio", details: error.message }),
+            { status: 500, headers: { "Content-Type": "application/json" } }
+        );
     }
 }

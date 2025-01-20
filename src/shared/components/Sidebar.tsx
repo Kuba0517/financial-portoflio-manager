@@ -114,7 +114,6 @@ export default function Sidebar() {
                 </nav>
             </div>
 
-            {/* Menu mobilne */}
             {isMobileOpen && (
                 <div
                     className="md:hidden fixed inset-0 z-50 bg-black bg-opacity-50"

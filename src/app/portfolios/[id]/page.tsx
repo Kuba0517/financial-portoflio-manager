@@ -1,64 +1,67 @@
-import PortfolioInvestments from "@/app/portfolios/components/PortfolioInvestments";
-import PortfolioReviews from "@/app/portfolios/components/PortfolioReviews";
 import apiClient from "@/lib/apiClient";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { UserRole } from "@/types/UserRoles";
+import ClientSideWrapper from "@/app/portfolios/components/ClientSideWrapper";
 
-interface Props {
+interface PortfolioDetailsProps {
     params: { id: string };
 }
 
-async function PortfolioDetails({ params }: Props) {
+export default async function PortfolioDetails({ params }: PortfolioDetailsProps) {
     const { id } = params;
 
     try {
+        const session = await getServerSession(authOptions);
+
         const response = await apiClient.get(`/api/portfolios/${id}`);
         const portfolioData = response.data;
 
+        console.log(portfolioData);
+
+        const isOwner = portfolioData.userId === session?.user?.id;
+        const isModerator = session?.user?.role === UserRole.MODERATOR;
+        const isAdmin = session?.user?.role === UserRole.ADMIN;
+        const canEdit = isOwner || isModerator || isAdmin;
+
         const assets = portfolioData.investments.reduce((grouped: any, investment: any) => {
             const assetName = investment.asset.name;
-
             if (!grouped[assetName]) {
                 grouped[assetName] = {
                     id: investment.asset.id,
                     name: assetName,
+                    iconUrl: investment.asset.iconUrl,
                     investments: [],
                 };
             }
-
             grouped[assetName].investments.push({
                 id: investment.id,
                 quantity: investment.quantity,
                 purchasePrice: investment.purchasePrice,
             });
-
             return grouped;
         }, {});
-
         const assetsArray = Object.values(assets);
 
+        console.log(assetsArray)
+
         return (
-            <div className="max-w-5xl mx-auto p-4">
-                <h1 className="text-2xl font-bold mb-5">{portfolioData.name}</h1>
-
-                <section className="mb-10">
-                    <h2 className="text-xl font-bold mb-3">Investments</h2>
-                    <PortfolioInvestments assets={assetsArray} />
-                </section>
-
-                <section>
-                    <PortfolioReviews reviews={portfolioData.userRatings || []} />
-                </section>
-            </div>
+            <ClientSideWrapper
+                session={session}
+                portfolioData={portfolioData}
+                canEdit={canEdit}
+                assetsArray={assetsArray}
+            />
         );
     } catch (error) {
         console.error(`Error fetching portfolio ${id}:`, error);
-
         return (
             <div className="max-w-5xl mx-auto p-4">
                 <h1 className="text-2xl font-bold mb-5">Portfolio Details</h1>
-                <p className="text-red-500">Failed to load portfolio details. Please try again later.</p>
+                <p className="text-red-500">
+                    Failed to load portfolio details. Please try again later.
+                </p>
             </div>
         );
     }
 }
-
-export default PortfolioDetails;

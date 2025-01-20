@@ -50,8 +50,8 @@ const SearchAssets: React.FC<SearchAssetsProps> = ({ onAssetSelect }) => {
     };
 
     const handleAssetClick = (asset: AssetSearchResponseDTO) => {
-        setSelectedAssetId(asset.id); // Ustawienie wybranego assetu
-        onAssetSelect(asset); // Przekazanie wybranego assetu do nadrzędnego komponentu
+        setSelectedAssetId(asset.id);
+        onAssetSelect(asset);
     };
 
     React.useEffect(() => {

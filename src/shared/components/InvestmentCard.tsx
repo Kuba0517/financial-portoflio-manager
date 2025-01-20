@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Image from "next/image";
 
 interface InvestmentCardProps {
     assetIconUrl: string;
@@ -22,11 +23,15 @@ export default function InvestmentCard({
     return (
         <div className="flex items-center justify-between p-4 bg-mainGreen-100 rounded-lg shadow">
             <div className="flex items-center">
-                <img
+                {assetIconUrl &&
+                <Image
                     src={assetIconUrl}
                     alt={assetName}
                     className="w-10 h-10 rounded-full mr-4"
+                    width={50}
+                    height={50}
                 />
+                }
                 <div>
                     <p className="font-bold">{assetTicker}</p>
                     <p className="text-sm text-gray-600">{assetName}</p>

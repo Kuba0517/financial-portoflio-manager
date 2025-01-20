@@ -39,10 +39,6 @@ export const authOptions = {
                 };
             },
         }),
-        GoogleProvider({
-            clientId: process.env.GOOGLE_CLIENT_ID || "",
-            clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
-        }),
     ],
     session: {
         strategy: "jwt" as SessionStrategy,
@@ -53,16 +49,13 @@ export const authOptions = {
                 token.id = user.id;
                 token.role = user.role;
             }
-            console.log("JWT callback - Token:", token);
             return token;
         },
         async session({ session, token }: { session: Session; token: JWT }) {
-            console.log("Session callback - Token:", token);
             if (token) {
                 session.user.id = token.id;
                 session.user.role = token.role;
             }
-            console.log("Session callback - Session:", session);
             return session;
         },
     },

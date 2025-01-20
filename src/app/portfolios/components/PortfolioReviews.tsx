@@ -1,8 +1,10 @@
+"use client";
+
 import { FaStar, FaRegStar } from "react-icons/fa";
 
 interface Review {
     id: string;
-    userId: string;
+    userName: string;
     rating: number;
     comment: string;
 }
@@ -15,13 +17,11 @@ export default function PortfolioReviews({ reviews }: PortfolioReviewsProps) {
     const renderStars = (rating: number) => {
         const stars = [];
         for (let i = 1; i <= 5; i++) {
-            stars.push(
-                i <= rating ? (
-                    <FaStar key={i} className="text-yellow-500" />
-                ) : (
-                    <FaRegStar key={i} className="text-gray-300" />
-                )
-            );
+            if (i <= rating) {
+                stars.push(<FaStar key={i} className="text-yellow-500" />);
+            } else {
+                stars.push(<FaRegStar key={i} className="text-gray-300" />);
+            }
         }
         return stars;
     };
@@ -39,8 +39,12 @@ export default function PortfolioReviews({ reviews }: PortfolioReviewsProps) {
                             className="p-4 border rounded-lg shadow-md bg-white hover:shadow-lg transition-shadow"
                         >
                             <div className="flex items-center justify-between mb-2">
-                                <div className="text-sm text-gray-600">{review.userName}</div>
-                                <div className="flex items-center">{renderStars(review.rating)}</div>
+                                <div className="text-sm text-gray-600">
+                                    {review.userName || "Anonymous"}
+                                </div>
+                                <div className="flex items-center">
+                                    {renderStars(review.rating)}
+                                </div>
                             </div>
                             <p className="text-gray-800">{review.comment}</p>
                         </li>

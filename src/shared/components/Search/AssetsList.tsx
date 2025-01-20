@@ -1,10 +1,11 @@
 import React from "react";
 import { AssetSearchResponseDTO } from "@/dtos/asset.dto";
+import Image from "next/image";
 
 interface AssetListProps {
     assets: AssetSearchResponseDTO[];
     onClick: (asset: AssetSearchResponseDTO) => void;
-    selectedAssetId: string | null; // Dodaj jako właściwość
+    selectedAssetId: string | null;
 }
 
 const AssetList: React.FC<AssetListProps> = ({ assets, onClick, selectedAssetId }) => {
@@ -23,8 +24,10 @@ const AssetList: React.FC<AssetListProps> = ({ assets, onClick, selectedAssetId 
                     }`}
                 >
                     {asset.iconUrl && (
-                        <img
+                        <Image
                             src={asset.iconUrl}
+                            width={50}
+                            height={50}
                             alt={`${asset.name} logo`}
                             className="w-12 h-12 object-contain mr-4 rounded-full"
                         />

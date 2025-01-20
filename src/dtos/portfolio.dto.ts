@@ -17,6 +17,7 @@ export interface PortfolioResponseDTO {
 export interface PortfolioDTO {
     id: string;
     name: string;
+    userId: string;
     createdAt: string;
     investments: Array<{
         quantity: number;

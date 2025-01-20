@@ -6,6 +6,7 @@ import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Input from "@/shared/components/Input";
 import Button from "@/shared/components/Button";
+import apiClient from "@/lib/apiClient";
 
 interface AuthFormProps {
     csrfToken?: string;
@@ -49,11 +50,7 @@ export default function AuthForm({
             }
         } else if (formType === "register") {
             try {
-                const response = await axios.post("/api/auth/register", data, {
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                });
+                const response = await apiClient.post("/api/auth/register", data);
 
                 if (response.status === 201) {
                     setSuccess(response.data.message || "Rejestracja zakończona sukcesem!");
