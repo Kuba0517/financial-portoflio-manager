@@ -38,8 +38,10 @@ export async function GET(req: Request) {
 
         return Response.json({results}, {status: 200});
 
-    } catch (error: any) {
-        return Response.json({error: error.message}, {status: 500});
+    } catch (error) {
+        if (error instanceof Error) {
+            return Response.json({error: error.message}, {status: 500});
+        }
     }
 }
 

@@ -91,11 +91,11 @@ export async function POST(req: Request) {
             { status: 201, headers: { "Content-Type": "application/json" } }
         );
     } catch (error) {
-        console.error("Error creating portfolio and investments:", error);
-
-        return new Response(
-            JSON.stringify({ error: "Failed to create portfolio", details: error.message }),
-            { status: 500, headers: { "Content-Type": "application/json" } }
-        );
+        if(error instanceof Error){
+            return new Response(
+                JSON.stringify({ error: "Failed to create portfolio", details: error.message }),
+                { status: 500, headers: { "Content-Type": "application/json" } }
+            );
+        }
     }
 }

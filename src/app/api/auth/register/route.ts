@@ -33,7 +33,8 @@ export async function POST(req: Request) {
             }
         }, {status: 201});
     } catch (error){
-        console.log(error);
-        return Response.json({error: "Error occurred during registration process"}, {status: 500});
+        if (error instanceof Error){
+            return Response.json({error: "Error during registration"}, {status: 500});
+        }
     }
 }

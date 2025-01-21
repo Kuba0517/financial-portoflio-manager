@@ -31,8 +31,8 @@ export default function UserPortfolio({ user, session }: UserPortfolioProps) {
             const response = await apiClient.get(`/api/portfolios?userId=${user.id}`);
             setPortfolios(response.data.portfolios);
         } catch (err) {
-            console.error("Error fetching portfolios:", err);
-            setError("Failed to load portfolios. Please try again later.");
+            console.error("Error fetching portoflios", err);
+            setError("Faile to load portfolios");
         } finally {
             setLoading(false);
         }
@@ -43,12 +43,12 @@ export default function UserPortfolio({ user, session }: UserPortfolioProps) {
     }, [user.id]);
 
     const handleDelete = async (id: string) => {
-        if (!confirm("Are you sure you want to delete this portfolio?")) return;
+        if (!confirm("Do you really want to delete this portfolio?")) return;
 
         try {
             await apiClient.delete(`/api/portfolios/${id}`);
             setPortfolios((prev) => prev.filter((portfolio) => portfolio.id !== id));
-            alert("Portfolio deleted successfully.");
+            alert("Portfolio deleted successfully");
         } catch (error) {
             console.error("Error deleting portfolio:", error);
             alert("Failed to delete portfolio. Please try again.");

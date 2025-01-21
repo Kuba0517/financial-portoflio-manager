@@ -21,12 +21,13 @@ interface NewPortfolioModalProps {
     onClose: () => void;
     portfolio?: { id: string; name: string; investments: Investment[] };
     session: Session;
+    onChange?: () => void;
 }
-
+``
 export default function NewPortfolioModal({
                                               onClose,
                                               portfolio,
-                                              session,
+                                              session
                                           }: NewPortfolioModalProps) {
     const [portfolioName, setPortfolioName] = useState(portfolio?.name || "");
     const [investments, setInvestments] = useState<Investment[]>(
@@ -82,19 +83,19 @@ export default function NewPortfolioModal({
                     payload
                 );
                 if (response.status === 200) {
-                    alert("Portfolio updated successfully!");
+                    alert("Portfolio updated");
                     onClose();
                 }
             } else {
                 const response = await apiClient.post("/api/portfolios", payload);
                 if (response.status === 201) {
-                    alert("Portfolio created successfully!");
+                    alert("Portfolio created");
                     onClose();
                 }
             }
         } catch (error) {
             console.error("Error creating/updating portfolio:", error);
-            alert("Failed to save portfolio. Please try again.");
+            alert("Failed to save");
         } finally {
             setIsSubmitting(false);
         }

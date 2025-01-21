@@ -36,8 +36,6 @@ export async function POST(req: Request) {
         return new Response(JSON.stringify(investment), { status: 201, headers: { "Content-Type": "application/json" } });
     } catch (error) {
         if (error instanceof Error) {
-            console.error("Error while creating an investment:", error);
-
             return new Response(
                 JSON.stringify({error: "Failed to add investment", details: error.message}),
                 {status: 400, headers: {"Content-Type": "application/json"}}

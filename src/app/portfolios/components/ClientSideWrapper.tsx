@@ -1,16 +1,43 @@
 "use client";
 
+import React, { useState } from "react";
 import PortfolioInvestments from "@/app/portfolios/components/PortfolioInvestments";
 import PortfolioReviewsWrapper from "@/app/portfolios/components/PortfolioReviewsWrapper";
 import Button from "@/shared/components/Button";
 import NewPortfolioModal from "@/shared/components/PortfolioModal";
-import { useState } from "react";
+import apiClient from "@/lib/apiClient";
+import { FaBrain } from "react-icons/fa";
+import Loader from "@/shared/components/Loader";
 
-
-import React from "react";
-
-export default function ClientSideWrapper({ session, portfolioData, canEdit, assetsArray }: any) {
+export default function ClientSideWrapper({ session, portfolioData, canEdit, assetsArray, isOwner }: any) {
     const [showModal, setShowModal] = useState(false);
+    const [analysisResult, setAnalysisResult] = useState<string | null>(null);
+    const [isGenerating, setIsGenerating] = useState(false);
+
+    const handleGenerateAnalysis = async () => {
+        const prompt = `I need a short analysis of this: ${portfolioData?.name} portfolio. 
+        This is what portfolio includes: ${JSON.stringify(portfolioData?.investments)}.
+        Give each of the stocks price prediction for 2025-2030 and quickly say why.
+        + format the response in valid HTML, using headings, bullet points, or tables.`
+
+
+        try {
+            setIsGenerating(true);
+            const response = await apiClient.post("/api/generateAnalysis", { prompt });
+
+            if (response.status === 200) {
+                const data = response.data;
+                setAnalysisResult(data?.answer || "No response from AI");
+            } else {
+                throw new Error(`error during analysis ${response.status}`);
+            }
+        } catch (err) {
+            console.error("handleGenerateAnalysis error:", err);
+            setAnalysisResult("Error");
+        } finally {
+            setIsGenerating(false);
+        }
+    };
 
     return (
         <div className="max-w-5xl mx-auto p-4">
@@ -27,12 +54,34 @@ export default function ClientSideWrapper({ session, portfolioData, canEdit, ass
                 <PortfolioInvestments assets={assetsArray} />
             </section>
 
+            {assetsArray.length > 0 &&
+            <section className="mb-10">
+                <Button
+                    label="Generate AI analysis"
+                    onClick={handleGenerateAnalysis}
+                    disabled={isGenerating}
+                    icon={<FaBrain/>}
+                />
+
+                {isGenerating && <Loader />}
+
+                {analysisResult && (
+                    <div className="mt-4 p-2 border rounded bg-gray-50">
+                        <p className="font-bold mb-2">AI conclusion:</p>
+                        <div
+                            dangerouslySetInnerHTML={{ __html: analysisResult }}
+                        />
+                    </div>
+                )}
+            </section>
+            }
+
             {session && (
                 <section>
                     <PortfolioReviewsWrapper
                         portfolioId={portfolioData.id}
                         initialReviews={portfolioData.userRatings || []}
-                        canAddReview={portfolioData.user?.id !== session?.user?.id}
+                        canAddReview={!isOwner}
                         userId={session?.user?.id}
                     />
                 </section>

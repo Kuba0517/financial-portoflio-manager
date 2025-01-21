@@ -16,7 +16,6 @@ export default function AdminUsersPage() {
                 setUsers(data);
             } catch (err: any) {
                 setError("Failed to fetch users");
-                console.error(err);
             }
         };
         fetchUsers();

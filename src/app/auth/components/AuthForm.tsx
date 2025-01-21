@@ -1,7 +1,6 @@
 "use client";
 
 import React, { FormEvent, useState } from "react";
-import axios from "axios";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Input from "@/shared/components/Input";
@@ -53,14 +52,14 @@ export default function AuthForm({
                 const response = await apiClient.post("/api/auth/register", data);
 
                 if (response.status === 201) {
-                    setSuccess(response.data.message || "Rejestracja zakończona sukcesem!");
+                    setSuccess(response.data.message || "Registered successfully!");
                     router.push("/auth/signin");
                 }
             } catch (err: any) {
                 if (err.response && err.response.data && err.response.data.error) {
                     setError(err.response.data.error);
                 } else {
-                    setError("Wystąpił błąd podczas rejestracji.");
+                    setError("error registration");
                 }
             }
         }

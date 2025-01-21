@@ -17,8 +17,6 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
         return new Response(JSON.stringify(rating), { status: 200, headers: { "Content-Type": "application/json" } });
     } catch (error) {
         if (error instanceof Error) {
-            console.error("Error fetching user portfolio rating:", error);
-
             return new Response(
                 JSON.stringify({error: "Failed to fetch rating", details: error.message}),
                 {status: 400, headers: {"Content-Type": "application/json"}}

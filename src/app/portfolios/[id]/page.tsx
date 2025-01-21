@@ -17,8 +17,6 @@ export default async function PortfolioDetails({ params }: PortfolioDetailsProps
         const response = await apiClient.get(`/api/portfolios/${id}`);
         const portfolioData = response.data;
 
-        console.log(portfolioData);
-
         const isOwner = portfolioData.userId === session?.user?.id;
         const isModerator = session?.user?.role === UserRole.MODERATOR;
         const isAdmin = session?.user?.role === UserRole.ADMIN;
@@ -51,10 +49,10 @@ export default async function PortfolioDetails({ params }: PortfolioDetailsProps
                 portfolioData={portfolioData}
                 canEdit={canEdit}
                 assetsArray={assetsArray}
+                isOwner={isOwner}
             />
         );
     } catch (error) {
-        console.error(`Error fetching portfolio ${id}:`, error);
         return (
             <div className="max-w-5xl mx-auto p-4">
                 <h1 className="text-2xl font-bold mb-5">Portfolio Details</h1>

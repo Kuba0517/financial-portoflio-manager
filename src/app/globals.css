@@ -14,10 +14,10 @@
        800: #1B4332
        900: #081C15
     */
-    --primary-color: #52B788;        /* mainGreen-500 */
-    --secondary-color: #B7E4C7;      /* mainGreen-200 */
-    --light-color: #D8F3DC;          /* mainGreen-100 */
-    --accent-color: #2D6A4F;         /* mainGreen-700 */
+    --primary-color: #52B788;
+    --secondary-color: #B7E4C7;
+    --light-color: #D8F3DC;
+    --accent-color: #2D6A4F;
     --background-color: #F8FFF8;
 
 body {

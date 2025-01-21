@@ -30,7 +30,7 @@ async function fetchSymbols(exchanges: string[] = ['US']): Promise<string[]> {
 
         return allSymbols;
     } catch (error: any) {
-        console.error('Błąd podczas pobierania symboli:', error.message);
+        console.error('errror with symbols: ', error.message);
         return [];
     }
 }
@@ -47,7 +47,7 @@ async function fetchAssetDetails(symbol: string): Promise<Partial<AssetModel> | 
         const profile = profileResponse.data;
 
         if (!profile) {
-            console.warn(`Brak profilu dla symbolu: ${symbol}`);
+            console.warn(`no photo for symbol: ${symbol}`);
             return null;
         }
 
@@ -62,7 +62,7 @@ async function fetchAssetDetails(symbol: string): Promise<Partial<AssetModel> | 
 
         return asset;
     } catch (error: any) {
-        console.error(`Błąd podczas pobierania danych dla symbolu ${symbol}:`, error.message);
+        console.error(`error fetching data for: ${symbol}:`, error.message);
         return null;
     }
 }
@@ -70,16 +70,16 @@ async function fetchAssetDetails(symbol: string): Promise<Partial<AssetModel> | 
 async function main() {
     try {
         await connectToDatabase();
-        console.log('Połączono z MongoDB.');
+        console.log('connected to mongo');
     } catch (error: any) {
-        console.error('Błąd połączenia z MongoDB:', error.message);
+        console.error('error connecting to mongo', error.message);
         process.exit(1);
     }
 
     const symbols = await fetchSymbols();
 
     if (symbols.length === 0) {
-        console.error('Brak symboli do przetworzenia. Zakończono skrypt.');
+        console.error('no symbols');
         process.exit(1);
     }
 
@@ -89,16 +89,12 @@ async function main() {
     });
 
     let processed = 0;
-    let successful = 0;
-    let skipped = 0;
-    let failed = 0;
 
     for (const symbol of symbols) {
         await queue.add(async () => {
             const existingAsset = await Asset.findOne({ symbol });
             if (existingAsset) {
                 console.log(`Symbol ${symbol} już istnieje w bazie danych. Pomijanie.`);
-                skipped++;
                 processed++;
                 return;
             }
@@ -108,31 +104,22 @@ async function main() {
             if (assetDetails) {
                 try {
                     await Asset.create(assetDetails);
-                    console.log(`Dodano nowy symbol: ${assetDetails.symbol}`);
-                    successful++;
+                    console.log(`new symbol added: ${assetDetails.symbol}`);
                 } catch (error: any) {
-                    console.error(`Błąd podczas zapisywania symbolu ${symbol}:`, error.message);
-                    failed++;
+                    console.error(`error saving symbol: ${symbol}:`, error.message);
                 }
             } else {
-                console.warn(`Brak danych dla symbolu: ${symbol}`);
-                failed++;
+                console.error(`no data for: ${symbol}`);
             }
 
             processed++;
             if (processed % 100 === 0) {
-                console.log(`Przetworzono ${processed}/${symbols.length} symboli.`);
+                console.log(`process ${processed}/${symbols.length} symbols`);
             }
         });
     }
 
     await queue.onIdle();
-
-    console.log('Skrypt zakończony.');
-    console.log(`Przetworzono: ${processed}`);
-    console.log(`Dodano nowe: ${successful}`);
-    console.log(`Pominięto istniejące: ${skipped}`);
-    console.log(`Niepowodzenia: ${failed}`);
 
     await mongoose.disconnect();
 }

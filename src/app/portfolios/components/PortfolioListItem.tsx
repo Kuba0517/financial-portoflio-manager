@@ -2,7 +2,6 @@
 
 import { useRouter } from "next/navigation";
 import Button from "@/shared/components/Button";
-import apiClient from "@/lib/apiClient";
 
 interface PortfolioListItemProps {
     id: string;

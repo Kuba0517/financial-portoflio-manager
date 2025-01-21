@@ -1,5 +1,4 @@
 import NextAuth, { Session, SessionStrategy } from "next-auth";
-import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials";
 import connectToDatabase from "@/lib/mongodb";
 import User from "@/models/User";

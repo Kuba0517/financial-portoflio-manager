@@ -48,13 +48,14 @@ export default function UserForm({ user, onSave }: UserFormProps) {
                     onChange={(e) => setRole(e.target.value)}
                     className="w-full rounded border p-2 focus:outline-none focus:ring focus:border-blue-300"
                 >
-                    <option value="USER">USER</option>
-                    <option value="ADMIN">ADMIN</option>
+                    <option value="user">USER</option>
+                    <option value="administrator">ADMIN</option>
+                    <option value="moderator">MODERATOR</option>
                 </select>
             </div>
 
             <div>
-                <label className="mb-1 block text-sm font-semibold text-gray-700">
+            <label className="mb-1 block text-sm font-semibold text-gray-700">
                     Description:
                 </label>
                 <textarea

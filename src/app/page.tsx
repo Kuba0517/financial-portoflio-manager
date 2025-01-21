@@ -6,7 +6,6 @@ import Button from "@/shared/components/Button";
 export default function Home() {
   return (
       <main className="min-h-screen w-full flex flex-col">
-        {/* Hero Section with dark green background */}
         <section className="bg-mainGreen-700 text-white py-16 sm:py-24 flex items-center">
           <div className="container mx-auto px-6 text-center">
             <motion.h1

@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { FaStar } from "react-icons/fa";
 import apiClient from "@/lib/apiClient";
+import Loader from "@/shared/components/Loader";
 
 interface ReviewFormProps {
     portfolioId: string;
@@ -81,14 +82,15 @@ export default function ReviewForm({ portfolioId, onNewReview, userId }: ReviewF
                     onChange={(e) => setComment(e.target.value)}
                 />
             </div>
-
+            {isSubmitting ? <Loader/> :
             <button
                 type="submit"
-                disabled={isSubmitting || rating === 0 || !comment.trim()}
+                disabled={rating === 0 || !comment.trim()}
                 className="px-3 py-1 bg-mainGreen-500 text-white rounded hover:bg-mainGreen-600 disabled:bg-gray-300 disabled:cursor-not-allowed"
             >
                 {isSubmitting ? "Submitting..." : "Submit Review"}
             </button>
+            }
         </form>
     );
 }

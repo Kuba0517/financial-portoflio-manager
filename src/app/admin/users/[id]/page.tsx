@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { useRouter, useParams } from "next/navigation";
+import { useParams } from "next/navigation";
 import UserForm from "@/app/admin/users/components/UserForm";
 import { UserResponseDTO } from "@/dtos/user.dto";
 import apiClient from "@/lib/apiClient";
@@ -9,7 +9,6 @@ import apiClient from "@/lib/apiClient";
 export default function UserDetailPage() {
     const [user, setUser] = useState<UserResponseDTO | null>(null);
     const [error, setError] = useState("");
-    const router = useRouter();
     const params = useParams();
     const userId = params.id;
 
